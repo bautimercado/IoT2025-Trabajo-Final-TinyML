@@ -10,11 +10,12 @@ Adafruit_MPU6050 mpu;
 
 // Parametros de muestreo
 const uint16_t FREQUENCY_HZ = 100;
-const uint16_t INTERVAL_MS = 1000 / FRECUENCY_HZ;
+const uint16_t INTERVAL_MS = 1000 / FREQUENCY_HZ;
 const uint8_t SENSORS_PER_SAMPLE = 4;
 const uint16_t NUM_INPUTS = EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE;
+const uint16_t ANALYSIS_INTERVAL_MS = 5000;
 const uint16_t INFERENCES_PER_WINDOW = 20;
-const float CONFIDENCE_THRESHOLD = 0.8f;
+const float CONFIDENCE_THRESHOLD = 0.5f;
 
 // Buffer y variables
 float input_buffer[NUM_INPUTS];
@@ -25,13 +26,7 @@ unsigned long last_interval = 0;
 float category_sums[EI_CLASSIFIER_LABEL_COUNT] = {0};
 uint16_t unknown_count = 0;
 uint16_t inference_count = 0;
-
-// Indices de las clases
-enum MotorState {
-  NORMAL = 0,
-  OFF = 1,
-  ANOMALLY = 2
-};
+unsigned long last_analysis = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -50,7 +45,8 @@ void setup() {
 
   Serial.println("✅ MPU6050 listo para análisis de anomalías.");
   Serial.println("🔊 Micrófono configurado en pin " + String(MIC_PIN));
-  Serial.println("📊 Iniciando captura de datos...\n");
+  Serial.println("📊 Análisis cada 5 segundos a 100Hz");
+  Serial.println("🚀 Iniciando captura de datos...\n");
 
   delay(1000);
 }
@@ -74,6 +70,7 @@ void loop() {
     input_buffer[buffer_index++] = a.acceleration.z;
     input_buffer[buffer_index++] = (float)mic_raw / 4095.0f;
 
+    // Cuando el buffer esta lleno, ejecuta inferencia
     if (buffer_index >= NUM_INPUTS) {
       run_inference();
 
@@ -82,6 +79,7 @@ void loop() {
               (NUM_INPUTS - SENSORS_PER_SAMPLE) * sizeof(float));
       buffer_index = NUM_INPUTS - SENSORS_PER_SAMPLE;
     }
+  }
 }
 
 // Callback
@@ -133,16 +131,19 @@ void run_inference() {
   }
 
   inference_count++;
-
-  if (inference_count >= INFERENCES_PER_WINDOW) {
-    evalute_motor_state();
+  // Evaluar resultado final cada 5 segundos
+  if (millis() - last_analysis >= ANALYSIS_INTERVAL_MS) {
+    if (inference_count > 0) {  // Solo si hay inferencias acumuladas
+      evaluate_motor_state();
+      last_analysis = millis();
+    }
   }
 }
 
 void evaluate_motor_state() {
   Serial.println("\n🏭 ===== ANÁLISIS DE ESTADO DEL MOTOR =====");
 
-  float total = static_cast<float>(inferece_count);
+  float total = static_cast<float>(inference_count);
   float max_avg = 0;
   size_t predicted_state = 0;
 
@@ -171,13 +172,15 @@ void evaluate_motor_state() {
   } else {
     String state_name = String(ei_classifier_inferencing_categories[predicted_state]);
     
-    if (predicted_state == ANOMALY) {
+    if (state_name.equals("anomally")) {
       Serial.println("🚨 ESTADO: ANOMALÍA DETECTADA - Revisar motor inmediatamente!");
       Serial.println("⚠️  Posibles causas: desbalanceo, desgaste, falla mecánica, etc.");
-    } else if (predicted_state == OFF) {
+    } else if (state_name.equals("off")) {
       Serial.println("⏹️  ESTADO: MOTOR APAGADO");
-    } else if (predicted_state == NORMAL) {
+    } else if (state_name.equals("normal")) {
       Serial.println("✅ ESTADO: FUNCIONAMIENTO NORMAL");
+    } else {
+      Serial.println("❓ ESTADO: " + state_name + " (etiqueta no reconocida)");
     }
     
     Serial.print("🎯 Confianza: ");
@@ -192,25 +195,3 @@ void evaluate_motor_state() {
   inference_count = 0;
   unknown_count = 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

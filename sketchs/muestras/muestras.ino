@@ -18,8 +18,8 @@ void setup() {
     while (1);
   }
 
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+  mpu.setFilterBandwidth(MPU6050_BAND_44_HZ);
 
   delay(100);
 }
