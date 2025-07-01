@@ -15,7 +15,7 @@ Este proyecto tiene como objetivo detectar el estado de funcionamiento de un mot
 
 - 📊 [Presentación del proyecto](https://docs.google.com/presentation/d/1oroHeTBnVjyxfnDnKWNkgLF05Cyge2w4DXz2BgdgEfI/edit?usp=sharing)
 - 🧠 [Proyecto en Edge Impulse](https://studio.edgeimpulse.com/public/727889/live)
-- 📄 [Informe en PDF](./informe.pdf) *(si lo subís al repo)*
+- 📄 [Informe en PDF](./informe.pdf)
 
 
 ### 📁 Contenido del repositorio
