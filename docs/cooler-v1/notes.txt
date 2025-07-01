@@ -1,1 +1,0 @@
-Por los datos vistos pareciera que el modelo es perfecto, pero en la practica el modelo falla al distinguir entre los estados normal y apagado del cooler (siempre infiere de que esta apagado cuando en realidad esta prendido). Es posible que la eleccion del dispositivo no haya sido la adecuada, en este caso seria mas conveniente utilizar algun otro sensor (ej: de corriente).

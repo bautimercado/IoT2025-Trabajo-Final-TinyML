@@ -2,7 +2,7 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 //#include <ei_run_classifier.h>
-#include <iot2025-trabajofinal_inferencing.h>
+#include <iot2025-trabajofinal-ventilador_inferencing.h>
 
 Adafruit_MPU6050 mpu;
 
@@ -13,9 +13,9 @@ const uint16_t FREQUENCY_HZ = 100;
 const uint16_t INTERVAL_MS = 1000 / FREQUENCY_HZ;
 const uint8_t SENSORS_PER_SAMPLE = 4;
 const uint16_t NUM_INPUTS = EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE;
-const uint16_t ANALYSIS_INTERVAL_MS = 5000;
+const uint16_t ANALYSIS_INTERVAL_MS = 4000;
 const uint16_t INFERENCES_PER_WINDOW = 20;
-const float CONFIDENCE_THRESHOLD = 0.5f;
+const float CONFIDENCE_THRESHOLD = 0.6f;
 
 // Buffer y variables
 float input_buffer[NUM_INPUTS];
@@ -30,7 +30,7 @@ unsigned long last_analysis = 0;
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin(21, 22);
+  //Wire.begin(21, 22);
   while (!Serial);
   
 
@@ -39,8 +39,8 @@ void setup() {
     while(1);
   }
 
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+  mpu.setFilterBandwidth(MPU6050_BAND_44_HZ);
   //mpu.setGyroRange(MPU6050_RANGE_500_DEG);
 
   Serial.println("✅ MPU6050 listo para análisis de anomalías.");
@@ -59,11 +59,11 @@ void loop() {
     mpu.getEvent(&a, &g, &temp);
 
     int mic_raw = analogRead(MIC_PIN);
-
+    /*
     if (mic_raw < 0 || mic_raw > 4095) {
       Serial.println("⚠️ Lectura de micrófono fuera de rango");
       mic_raw = 2048; // Valor medio como fallback
-    }
+    }*/
 
     input_buffer[buffer_index++] = a.acceleration.x;
     input_buffer[buffer_index++] = a.acceleration.y;
@@ -125,6 +125,13 @@ void run_inference() {
     Serial.print(" (");
     Serial.print(max_confidence, 2);
     Serial.println(")");
+
+    Serial.print("🔍 Debug - Anomally: ");
+    Serial.print(result.classification[0].value, 3); // Asumiendo que normal es índice 1
+    Serial.print(" | Normal: ");
+    Serial.print(result.classification[1].value, 3); // Asumiendo que off es índice 2
+    Serial.print(" | Off: ");
+    Serial.println(result.classification[2].value, 3);
   } else {
     unknown_count++;
     Serial.println("❓ Inferencia incierta");

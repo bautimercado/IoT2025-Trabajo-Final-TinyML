@@ -1,2 +1,0 @@
-Es un modelo inicial de pruebas con el ventilador con resultados buenos pero mejorables. El modelo distingue correctamente el estado 'off', pero se confunde entre los estados 'normal' y 'anomally', por lo que habria que recolectar mas muestras de esos dos estados usando distintas velocidades, haciendo balanceos, cambiando la base del ventilador, etc.
-- La idea seria tener mas variedad de datos anomalos.
