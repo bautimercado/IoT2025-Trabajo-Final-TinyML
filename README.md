@@ -36,5 +36,5 @@ Este proyecto tiene como objetivo detectar el estado de funcionamiento de un mot
 
 ### 📌 Notas
 
-- El modelo embebido infiere cada ~4 segundos, acumula los datos sensados en un buffer circular y clasifica en base a umbral de confianza (60%).
+- El modelo embebido infiere a 100Hz, acumula los datos sensados en un buffer circular y clasifica en base a umbral de confianza (60%).
 - El sistema fue validado con un ventilador común simulado con distintas anomalías mecánicas.
